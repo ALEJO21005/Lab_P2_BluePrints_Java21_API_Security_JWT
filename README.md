@@ -322,49 +322,15 @@ public ResponseEntity<ApiResponse<MessageResponse>> addPoint(@PathVariable Strin
 
 El tiempo de vida del token JWT se configura en el archivo `application.yml` mediante la propiedad `blueprints.security.token-ttl-seconds`. Por defecto, esta configuración estaba establecida en **3600 segundos (1 hora)**, pero se ha modificado a **300 segundos (5 minutos)** para demostrar el efecto de tokens de corta duración.
 
-### Configuración actual
-
-```yaml
-blueprints:
-  security:
-    issuer: "https://decsis-eci/blueprints"
-    token-ttl-seconds: 300  # 5 minutos (antes era 3600)
-```
-
-### ¿Cómo funciona?
-
-Cuando un usuario se autentica exitosamente en el endpoint `POST /auth/login`, el servidor genera un token JWT que incluye dos claims relacionados con el tiempo:
-
-- **`iat` (Issued At):** Timestamp en el que se emitió el token
-- **`exp` (Expiration Time):** Timestamp en el que el token expira (calculado como `iat + token-ttl-seconds`)
-
-El `AuthController` construye estos claims de la siguiente manera:
-
-```java
-Instant now = Instant.now();
-long ttl = props.tokenTtlSeconds() != null ? props.tokenTtlSeconds() : 3600;
-Instant exp = now.plusSeconds(ttl);
-
-JwtClaimsSet claims = JwtClaimsSet.builder()
-    .issuedAt(now)
-    .expiresAt(exp)
-    .subject(req.username())
-    .claim("scope", scope)
-    .build();
-```
 
 ### Efectos observados
 
 #### 1. **Respuesta del endpoint de login**
 El campo `expires_in` en la respuesta del login ahora retorna `300` en lugar de `3600`:
 
-```json
-{
-  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "Bearer",
-  "expires_in": 300
-}
-```
+<div align="center">
+  <img src="img/yml.png" alt="yml" style="max-width: 400px; display: block; margin: 0 auto;" />
+</div>
 
 Este valor indica al cliente cuántos segundos tiene el token antes de expirar.
 
@@ -388,36 +354,6 @@ Con un TTL de **1 hora (3600 segundos)**, el comportamiento es:
 - Más apropiado para entornos de producción
 - Mayor ventana de riesgo si un token es interceptado
 
-#### 4. **Verificación práctica**
-Para observar el efecto:
-
-1. Obtener un token haciendo login:
-   ```bash
-   POST /auth/login
-   { "username": "student", "password": "student123" }
-   ```
-
-2. Usar el token inmediatamente (funciona correctamente):
-   ```bash
-   GET /api/v1/blueprints
-   Authorization: Bearer <token>
-   # Respuesta: HTTP 200 OK
-   ```
-
-3. Esperar 6 minutos y volver a usar el mismo token:
-   ```bash
-   GET /api/v1/blueprints
-   Authorization: Bearer <token_expirado>
-   # Respuesta: HTTP 401 Unauthorized (token expirado)
-   ```
-
-4. Solicitar un nuevo token y volver a intentar (funciona nuevamente).
-
-### Recomendaciones
-
-- **Desarrollo/Testing:** Usar valores cortos (300-900 segundos) facilita probar el flujo de renovación de tokens
-- **Producción:** Usar valores entre 3600-7200 segundos (1-2 horas) para balancear seguridad y experiencia de usuario
-- **Aplicaciones críticas:** Considerar tokens de corta duración (15-30 minutos) junto con mecanismos de refresh tokens
 
 ---
 

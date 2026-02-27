@@ -354,7 +354,15 @@ Con un TTL de **1 hora (3600 segundos)**, el comportamiento es:
 - Más apropiado para entornos de producción
 - Mayor ventana de riesgo si un token es interceptado
 
+---
 
+## 5. Documentar endpoints de autenticación y negocio en Swagger
+
+Para facilitar la prueba y comprensión de la API, se agregó documentación completa usando anotaciones de **Swagger/OpenAPI** en los controladores principales: `AuthController` y `BlueprintController`.
+
+<div align="center">
+  <img src="img/documentacion.png" alt="documentacion" style="max-width: 400px; display: block; margin: 0 auto;" />
+</div>
 ---
 
 ## Lecturas recomendadas

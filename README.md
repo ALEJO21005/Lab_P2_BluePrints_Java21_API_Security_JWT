@@ -227,6 +227,97 @@ Ambos usuarios reciben **exactamente los mismos scopes** al autenticarse.
 
 ---
 
+## 3. Extender los scopes (blueprints.read, blueprints.write)
+
+Para proteger los endpoints de la API del laboratorio P1 (implementados en `BlueprintsAPIController.java`), se extendieron los controles de seguridad utilizando la anotación `@PreAuthorize` con los scopes definidos.
+
+### Implementación
+
+Se agregó el import necesario en el controlador:
+
+```java
+import org.springframework.security.access.prepost.PreAuthorize;
+```
+
+Luego se aplicaron las anotaciones de seguridad a cada endpoint según su operación:
+
+#### Endpoints protegidos con `blueprints.read` (operaciones de lectura):
+
+```java
+@GetMapping
+@PreAuthorize("hasAuthority('SCOPE_blueprints.read')")
+public ResponseEntity<ApiResponse<Set<BlueprintResponse>>> getAll() { ... }
+
+@GetMapping("/{author}")
+@PreAuthorize("hasAuthority('SCOPE_blueprints.read')")
+public ResponseEntity<ApiResponse<Set<BlueprintResponse>>> byAuthor(@PathVariable String author) { ... }
+
+@GetMapping("/{author}/{bpname}")
+@PreAuthorize("hasAuthority('SCOPE_blueprints.read')")
+public ResponseEntity<ApiResponse<BlueprintResponse>> byAuthorAndName(@PathVariable String author, @PathVariable String bpname) { ... }
+```
+
+Y así, podemos evidenviar en el swagger que los controllers quedaron cifrados: 
+
+<div align="center">
+  <img src="img/scopes-seguridad.png" alt="scopes-seguridad" style="max-width: 400px; display: block; margin: 0 auto;" />
+</div>
+
+| Endpoint | Método | Descripción | Scope requerido |
+|----------|--------|-------------|-----------------|
+| `/api/v1/blueprints` | GET | Obtener todos los blueprints | `blueprints.read` |
+| `/api/v1/blueprints/{author}` | GET | Obtener blueprints por autor | `blueprints.read` |
+| `/api/v1/blueprints/{author}/{bpname}` | GET | Obtener blueprint específico | `blueprints.read` |
+
+<div align="center">
+  <img src="img/login.png" alt="login" style="max-width: 700px;" />
+  <p><em>Figura 3.1: Prueba GET /api/v1/blueprints con scope blueprints.read</em></p>
+</div>
+
+<div align="center">
+  <img src="img/get-all-login.png" alt="get-all-login" style="max-width: 400px; display: block; margin: 0 auto;" />
+</div>
+
+
+<div align="center">
+  <img src="img/get-blueprints-by-author.png" alt="GET blueprints por autor" style="max-width: 700px;" />
+  <p><em>Figura 3.2: Prueba GET /api/v1/blueprints/{author} filtrando por autor</em></p>
+</div>
+#### Endpoints protegidos con `blueprints.write` (operaciones de escritura):
+
+```java
+@PostMapping
+@PreAuthorize("hasAuthority('SCOPE_blueprints.write')")
+public ResponseEntity<ApiResponse<BlueprintResponse>> add(@Valid @RequestBody NewBlueprintRequest req) { ... }
+
+@PutMapping("/{author}/{bpname}/points")
+@PreAuthorize("hasAuthority('SCOPE_blueprints.write')")
+public ResponseEntity<ApiResponse<MessageResponse>> addPoint(@PathVariable String author, @PathVariable String bpname, @Valid @RequestBody AddPointRequest req) { ... }
+```
+
+| Endpoint | Método | Descripción | Scope requerido |
+|----------|--------|-------------|-----------------|
+| `/api/v1/blueprints` | POST | Crear nuevo blueprint | `blueprints.write` |
+| `/api/v1/blueprints/{author}/{bpname}/points` | PUT | Agregar punto a blueprint | `blueprints.write` |
+
+
+### Comportamiento
+
+**Con token válido y scope correcto:**
+- Las peticiones se procesan normalmente y retornan la respuesta esperada (200, 201, etc.)
+
+**Sin token o con token sin el scope apropiado:**
+- La petición es rechazada con **HTTP 403 Forbidden**
+- Spring Security verifica automáticamente que el token JWT contenga el scope requerido antes de ejecutar el método del controlador
+
+<div align="center">
+  <img src="img/forbidden-without-token.png" alt="Error 403 sin token" style="max-width: 700px;" />
+  <p><em>Figura 3.5: Respuesta HTTP 403 Forbidden al intentar acceder sin token de autorización</em></p>
+</div>
+
+
+---
+
 ## Lecturas recomendadas
 - [Spring Security Reference – OAuth2 Resource Server](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/index.html)
 - [Spring Boot – Securing Web Applications](https://spring.io/guides/gs/securing-web/)

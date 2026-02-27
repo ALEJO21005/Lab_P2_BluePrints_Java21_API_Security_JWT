@@ -13,4 +13,4 @@ spring:
 blueprints:
   security:
     issuer: "https://decsis-eci/blueprints"
-    token-ttl-seconds: 3600
+    token-ttl-seconds: 300  # 5 minutos (modificado desde 3600 para demostración)

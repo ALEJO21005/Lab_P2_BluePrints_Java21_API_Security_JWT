@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record BlueprintWebSocketMessage(
-        String type,  // "POINT_ADDED", "BLUEPRINT_CREATED", "BLUEPRINT_UPDATED", "BLUEPRINT_DELETED"
+        String type,  // "POINT_ADDED", "BLUEPRINT_CREATED", "BLUEPRINT_UPDATED", "BLUEPRINT_DELETED", "ALL_BLUEPRINTS_DELETED", "POINT_DELETED"
         String author,
         String blueprintName,
         Point addedPoint,
@@ -39,6 +39,46 @@ public record BlueprintWebSocketMessage(
                 points,
                 points != null ? points.size() : 0,
                 "Blueprint created",
+                LocalDateTime.now()
+        );
+    }
+
+    public static BlueprintWebSocketMessage blueprintDeleted(String author, String blueprintName) {
+        return new BlueprintWebSocketMessage(
+                "BLUEPRINT_DELETED",
+                author,
+                blueprintName,
+                null,
+                null,
+                0,
+                "Blueprint deleted",
+                LocalDateTime.now()
+        );
+    }
+
+    public static BlueprintWebSocketMessage allBlueprintsDeleted() {
+        return new BlueprintWebSocketMessage(
+                "ALL_BLUEPRINTS_DELETED",
+                null,
+                null,
+                null,
+                null,
+                0,
+                "All blueprints deleted",
+                LocalDateTime.now()
+        );
+    }
+
+    public static BlueprintWebSocketMessage pointDeleted(String author, String blueprintName,
+                                                        Point deletedPoint, List<Point> allPoints) {
+        return new BlueprintWebSocketMessage(
+                "POINT_DELETED",
+                author,
+                blueprintName,
+                deletedPoint,
+                allPoints,
+                allPoints != null ? allPoints.size() : 0,
+                "Point deleted from blueprint",
                 LocalDateTime.now()
         );
     }

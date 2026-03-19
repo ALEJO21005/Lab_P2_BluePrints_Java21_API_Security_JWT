@@ -73,4 +73,42 @@ public class BlueprintsServices {
         webSocketController.notifyBlueprintUpdate(author, name, message);
         webSocketController.notifyGlobalBlueprintUpdate(message);
     }
+
+    public void deleteBlueprint(String author, String name) throws BlueprintNotFoundException {
+        persistence.deleteBlueprint(author, name);
+
+        // Enviar notificación WebSocket
+        BlueprintWebSocketMessage message = BlueprintWebSocketMessage.blueprintDeleted(author, name);
+        webSocketController.notifyBlueprintUpdate(author, name, message);
+        webSocketController.notifyGlobalBlueprintUpdate(message);
+    }
+
+    public void deletePoint(String author, String name, int x, int y) throws BlueprintNotFoundException {
+        // Crear una copia del punto antes de eliminarlo
+        Point deletedPoint = new Point(x, y);
+
+        persistence.deletePoint(author, name, x, y);
+
+        // Obtener el blueprint actualizado para la notificación WebSocket
+        Blueprint updatedBlueprint = persistence.getBlueprint(author, name);
+
+        // Enviar notificación WebSocket específica para este blueprint
+        BlueprintWebSocketMessage message = BlueprintWebSocketMessage.pointDeleted(
+                author,
+                name,
+                deletedPoint,
+                updatedBlueprint.getPoints()
+        );
+
+        webSocketController.notifyBlueprintUpdate(author, name, message);
+        webSocketController.notifyGlobalBlueprintUpdate(message);
+    }
+
+    public void deleteAllBlueprints() {
+        persistence.deleteAllBlueprints();
+
+        // Enviar notificación WebSocket global
+        BlueprintWebSocketMessage message = BlueprintWebSocketMessage.allBlueprintsDeleted();
+        webSocketController.notifyGlobalBlueprintUpdate(message);
+    }
 }

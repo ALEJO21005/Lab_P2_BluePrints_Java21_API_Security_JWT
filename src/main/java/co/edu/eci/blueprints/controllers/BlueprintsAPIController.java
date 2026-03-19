@@ -89,14 +89,45 @@ public class BlueprintsAPIController {
     @PreAuthorize("hasAuthority('SCOPE_blueprints.write')")
     @Operation(summary = "Agregar punto a blueprint", description = "Agrega un nuevo punto a un blueprint existente y devuelve todos los puntos")
     public ResponseEntity<ApiResponse<BlueprintPointsResponse>> addPoint(@PathVariable String author,
-                                                                           @PathVariable String bpname,
-                                                                           @Valid @RequestBody AddPointRequest req) {
+        @PathVariable String bpname,
+        @Valid @RequestBody AddPointRequest req) {
         try {
             services.addPoint(author, bpname, req.x(), req.y());
             Blueprint updatedBlueprint = services.getBlueprint(author, bpname);
             BlueprintPointsResponse response = BlueprintPointsResponse.fromBlueprint(updatedBlueprint);
             return ResponseEntity.status(HttpStatus.ACCEPTED)
                     .body(ApiResponse.accepted(response));
+        } catch (BlueprintNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.notFound(e.getMessage()));
+        }
+    }
+
+    // DELETE /blueprints/{author}/{bpname}
+    @DeleteMapping("/{author}/{bpname}")
+    @PreAuthorize("hasAuthority('SCOPE_blueprints.write')")
+    @Operation(summary = "Eliminar blueprint específico", description = "Elimina un blueprint específico dado el autor y nombre")
+    public ResponseEntity<ApiResponse<MessageResponse>> deleteBlueprint(@PathVariable String author, @PathVariable String bpname) {
+        try {
+            services.deleteBlueprint(author, bpname);
+            MessageResponse response = new MessageResponse("Blueprint deleted successfully: " + author + "/" + bpname);
+            return ResponseEntity.ok(ApiResponse.ok(response));
+        } catch (BlueprintNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.notFound(e.getMessage()));
+        }
+    }
+
+    // DELETE /blueprints/{author}/{bpname}/points/{x}/{y}
+    @DeleteMapping("/{author}/{bpname}/points/{x}/{y}")
+    @PreAuthorize("hasAuthority('SCOPE_blueprints.write')")
+    @Operation(summary = "Eliminar punto específico", description = "Elimina un punto específico de un blueprint dado autor, nombre y coordenadas")
+    public ResponseEntity<ApiResponse<MessageResponse>> deletePoint(@PathVariable String author,
+        @PathVariable String bpname,
+        @PathVariable int x,
+        @PathVariable int y) {
+        try {
+            services.deletePoint(author, bpname, x, y);
+            MessageResponse response = new MessageResponse("Point (" + x + ", " + y + ") deleted successfully from blueprint: " + author + "/" + bpname);
+            return ResponseEntity.ok(ApiResponse.ok(response));
         } catch (BlueprintNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.notFound(e.getMessage()));
         }

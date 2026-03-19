@@ -62,4 +62,29 @@ public class InMemoryBlueprintPersistence implements BlueprintPersistence {
         Blueprint bp = getBlueprint(author, name);
         bp.addPoint(new Point(x, y));
     }
+
+    @Override
+    public void deleteBlueprint(String author, String name) throws BlueprintNotFoundException {
+        String key = keyOf(author, name);
+        Blueprint removed = blueprints.remove(key);
+        if (removed == null) {
+            throw new BlueprintNotFoundException("Blueprint not found: %s/%s".formatted(author, name));
+        }
+    }
+
+    @Override
+    public void deletePoint(String author, String name, int x, int y) throws BlueprintNotFoundException {
+        Blueprint bp = getBlueprint(author, name);
+
+        boolean removed = bp.getPoints().removeIf(point -> point.getX() == x && point.getY() == y);
+
+        if (!removed) {
+            throw new BlueprintNotFoundException("Point (" + x + ", " + y + ") not found in blueprint: " + author + "/" + name);
+        }
+    }
+
+    @Override
+    public void deleteAllBlueprints() {
+        blueprints.clear();
+    }
 }

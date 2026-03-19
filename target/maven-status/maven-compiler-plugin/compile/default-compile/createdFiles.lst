@@ -4,6 +4,7 @@ co\edu\eci\blueprints\persistence\PostgresBlueprintPersistence.class
 co\edu\eci\blueprints\persistence\BlueprintNotFoundException.class
 co\edu\eci\blueprints\dto\response\BlueprintResponse.class
 co\edu\eci\blueprints\auth\AuthController$TokenResponse.class
+co\edu\eci\blueprints\config\WebSocketConfig.class
 co\edu\eci\blueprints\model\Point.class
 co\edu\eci\blueprints\services\BlueprintsServices.class
 co\edu\eci\blueprints\filters\IdentityFilter.class
@@ -15,9 +16,11 @@ co\edu\eci\blueprints\dto\request\NewBlueprintRequest.class
 co\edu\eci\blueprints\security\InMemoryUserService.class
 co\edu\eci\blueprints\persistence\BlueprintJpaRepository.class
 co\edu\eci\blueprints\api\BlueprintController.class
+co\edu\eci\blueprints\controllers\BlueprintWebSocketController.class
 co\edu\eci\blueprints\model\Blueprint.class
 co\edu\eci\blueprints\auth\AuthController.class
 co\edu\eci\blueprints\BlueprintsApiApplication.class
+co\edu\eci\blueprints\dto\response\BlueprintPointsResponse.class
 co\edu\eci\blueprints\model\ApiResponse.class
 co\edu\eci\blueprints\controllers\BlueprintsAPIController.class
 co\edu\eci\blueprints\filters\RedundancyFilter.class
@@ -25,6 +28,7 @@ co\edu\eci\blueprints\persistence\InMemoryBlueprintPersistence.class
 co\edu\eci\blueprints\security\JwtKeyProvider.class
 co\edu\eci\blueprints\config\OpenApiConfig.class
 co\edu\eci\blueprints\filters\BlueprintsFilter.class
+co\edu\eci\blueprints\dto\websocket\BlueprintWebSocketMessage.class
 co\edu\eci\blueprints\dto\request\AddPointRequest.class
 co\edu\eci\blueprints\persistence\BlueprintPersistence.class
 co\edu\eci\blueprints\security\RsaKeyProperties.class

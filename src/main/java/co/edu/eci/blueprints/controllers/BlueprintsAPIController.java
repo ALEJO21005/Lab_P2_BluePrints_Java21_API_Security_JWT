@@ -3,6 +3,7 @@ package co.edu.eci.blueprints.controllers;
 import co.edu.eci.blueprints.dto.request.AddPointRequest;
 import co.edu.eci.blueprints.dto.request.NewBlueprintRequest;
 import co.edu.eci.blueprints.dto.response.BlueprintResponse;
+import co.edu.eci.blueprints.dto.response.BlueprintPointsResponse;
 import co.edu.eci.blueprints.dto.response.MessageResponse;
 import co.edu.eci.blueprints.model.ApiResponse;
 import co.edu.eci.blueprints.model.Blueprint;
@@ -86,14 +87,16 @@ public class BlueprintsAPIController {
     // PUT /blueprints/{author}/{bpname}/points
     @PutMapping("/{author}/{bpname}/points")
     @PreAuthorize("hasAuthority('SCOPE_blueprints.write')")
-    @Operation(summary = "Agregar punto a blueprint", description = "Agrega un nuevo punto a un blueprint existente")
-    public ResponseEntity<ApiResponse<MessageResponse>> addPoint(@PathVariable String author, 
-                                                                   @PathVariable String bpname,
-                                                                   @Valid @RequestBody AddPointRequest req) {
+    @Operation(summary = "Agregar punto a blueprint", description = "Agrega un nuevo punto a un blueprint existente y devuelve todos los puntos")
+    public ResponseEntity<ApiResponse<BlueprintPointsResponse>> addPoint(@PathVariable String author,
+                                                                           @PathVariable String bpname,
+                                                                           @Valid @RequestBody AddPointRequest req) {
         try {
             services.addPoint(author, bpname, req.x(), req.y());
+            Blueprint updatedBlueprint = services.getBlueprint(author, bpname);
+            BlueprintPointsResponse response = BlueprintPointsResponse.fromBlueprint(updatedBlueprint);
             return ResponseEntity.status(HttpStatus.ACCEPTED)
-                    .body(ApiResponse.accepted(MessageResponse.of("Point added successfully")));
+                    .body(ApiResponse.accepted(response));
         } catch (BlueprintNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.notFound(e.getMessage()));
         }
